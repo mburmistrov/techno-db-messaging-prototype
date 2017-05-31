@@ -26,6 +26,22 @@ class Message extends \yii\base\Model
     }
 
     /**
+     * Returns existing data from operative layer for user
+     */
+    public static function getPersistentUserConversationData($userId, $conversationId, $persistentShardId)
+    {
+      $sql = "
+      SELECT * FROM technodb.persistent_:shard_id
+      WHERE user_id = :user_id AND conversation_id = :conversation_id
+      ";
+      $command = Yii::$app->db->createCommand($sql);
+      $command->bindValue(':user_id', $userId);
+      $command->bindValue(':conversation_id', $conversationId);
+      $command->bindValue(':shard_id', $persistentShardId);
+      return $command->queryAll();
+    }
+
+    /**
      * Adds new message to operative layer for certain user
      */
     public static function addMessage($userId, $data)
@@ -83,25 +99,17 @@ class Message extends \yii\base\Model
         $operativeData = [];
         if (isset($operativeDataCommandResult[0]['data'])) {
             $operativeData = json_decode($operativeDataCommandResult[0]['data'], true);
+            $operativeData = array_reverse($operativeData);
             foreach($operativeData as $operation){
-                //echo "<pre>";
-                //\yii\helpers\VarDumper::dump($operation);exit;
                 if ($operation['operation'] == "newMessage") {
                     $messageData = [];
-                    $messageData['author_id'] = $operation['author_id'];
+                    $messageData['user_id'] = $operation['user_id'];
                     $messageData['message_id'] = $operation['message_id'];
                     $messageData['message'] = $operation['message'];
                     $messageData['timestamp'] = $operation['timestamp'];
 
-                    $sql = "
-                    SELECT * FROM technodb.persistent_:shard_id
-                    WHERE user_id = :user_id AND conversation_id = :conversation_id
-                    ";
-                    $command = Yii::$app->db->createCommand($sql);
-                    $command->bindValue(':user_id', $userId);
-                    $command->bindValue(':conversation_id', $operation['conversation_id']);
-                    $command->bindValue(':shard_id', $persistentShardId);
-                    $existingConversationDataCommandResult = $command->queryAll();
+
+                    $existingConversationDataCommandResult = self::getPersistentUserConversationData($userId, $operation['conversation_id'], $persistentShardId);
                     $existingConversationData = [];
                     $noExistingData = true;
                     if (isset($existingConversationDataCommandResult[0]['data'])) {
@@ -151,5 +159,46 @@ class Message extends \yii\base\Model
             $commandResult = $command->execute();
             $transaction->commit();
         }
+    }
+
+    /**
+     * Returns certain conversation for certain user
+     */
+    public static function getUserConversation($userId, $conversationId)
+    {
+        $operativeShardId = User::calculateOperativeShardId($userId);
+        $persistentShardId = User::calculatePersistentShardId($userId);
+
+        $existingConversationData = [];
+        $existingConversationDataCommandResult = self::getPersistentUserConversationData($userId, $conversationId, $persistentShardId);
+        if (isset($existingConversationDataCommandResult[0]['data'])) {
+            $existingConversationData = json_decode($existingConversationDataCommandResult[0]['data'], true);
+        }
+
+        $operativeDataCommandResult = self::getExistingOperativeData($userId, $operativeShardId);
+        $operativeData = [];
+        if (isset($operativeDataCommandResult[0]['data'])) {
+            $operativeData = json_decode($operativeDataCommandResult[0]['data'], true);
+            $operativeData = array_reverse($operativeData);
+            foreach($operativeData as $operation){
+                if ($operation['operation'] == "newMessage" && $operation['conversation_id'] == $conversationId) {
+                    $messageData = [];
+                    $messageData['user_id'] = $operation['user_id'];
+                    $messageData['message_id'] = $operation['message_id'];
+                    $messageData['message'] = $operation['message'];
+                    $messageData['timestamp'] = $operation['timestamp'];
+                    $messageData['from_operative'] = true;
+
+                    if (!empty($existingConversationData)) {
+                        array_unshift($existingConversationData["messages"], $messageData);
+                    } else {
+                        $existingConversationData["participants"] = $operation["participants"];
+                        $existingConversationData["messages"][] = $messageData;
+                    }
+
+                }
+            }
+        }
+        return $existingConversationData;
     }
 }
