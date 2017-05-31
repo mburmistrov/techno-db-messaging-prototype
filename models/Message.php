@@ -13,15 +13,15 @@ class Message extends \yii\base\Model
     /**
      * Adds new message to operative layer for certain user
      */
-    public static function addMessage($user, $data)
+    public static function addMessage($userId, $data)
     {
-        $operativeShardId = User::calculateOperativeShardId($user);
+        $operativeShardId = User::calculateOperativeShardId($userId);
         $sql = "
         SELECT * FROM technodb.operative_:shard_id
         WHERE user_id = :user_id
         ";
         $command = Yii::$app->db->createCommand($sql);
-        $command->bindValue(':user_id', $user);
+        $command->bindValue(':user_id', $userId);
         $command->bindValue(':shard_id', $operativeShardId);
         $commandResult = $command->queryAll();
 
@@ -54,12 +54,22 @@ class Message extends \yii\base\Model
         }
 
         $command = Yii::$app->db->createCommand($sql);
-        $command->bindValue(':user_id', $user);
+        $command->bindValue(':user_id', $userId);
         $command->bindValue(':shard_id', $operativeShardId);
         $command->bindValue(':data', json_encode($existingOperativeData));
         $commandResult = $command->execute();
         $transaction->commit();
 
         return true;
+    }
+
+    /**
+     * Moves data from user operative layer to persistent layer
+     */
+    public static function transferOperativeToPersistent($userId)
+    {
+        $operativeShardId = User::calculateOperativeShardId($userId);
+        $persistentShardId = User::calculatePersistentShardId($userId);
+        //code will be here
     }
 }
