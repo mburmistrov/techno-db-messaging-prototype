@@ -214,4 +214,13 @@ class User extends ActiveRecord implements IdentityInterface
         //1-st shard for odd, 2-nd shard for even
         return (1 - $user % 2) + 1;
     }
+
+    /**
+     * Returns persistent shard id
+     */
+    public static function calculatePersistentShardId($user)
+    {
+        //1-st shard for even, 2-nd shard for odd
+        return $user % 2 + 1;
+    }
 }
