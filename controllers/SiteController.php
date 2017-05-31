@@ -10,6 +10,7 @@ use app\models\LoginForm;
 use app\models\SignupForm;
 use app\models\ContactForm;
 use app\models\User;
+use app\models\Message;
 
 class SiteController extends Controller
 {
@@ -62,7 +63,12 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        if(Yii::$app->user->isGuest) {
+            $this->redirect('/site/login');
+        } else {
+            $this->redirect('/site/panel');
+        }
+
     }
 
     /**
@@ -116,5 +122,20 @@ class SiteController extends Controller
         return $this->render('signup', [
             'model' => $model,
         ]);
+    }
+
+    /**
+     * Window with messaging functionality
+     *
+     * @return mixed
+     */
+    public function actionPanel()
+    {
+        $tpl = [];
+        $tpl['operativeShardId'] = User::calculateOperativeShardId(Yii::$app->user->identity->id);
+        $tpl['persistentShardId'] = User::calculatePersistentShardId(Yii::$app->user->identity->id);
+        $tpl['allUsers'] = User::find()->all();
+
+        return $this->render('panel', $tpl);
     }
 }
