@@ -205,4 +205,13 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    /**
+     * Returns operative shard id
+     */
+    public static function calculateOperativeShardId($user)
+    {
+        //1-st shard for odd, 2-nd shard for even
+        return (1 - $user % 2) + 1;
+    }
 }
