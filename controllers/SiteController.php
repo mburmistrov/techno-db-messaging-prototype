@@ -125,6 +125,21 @@ class SiteController extends Controller
     }
 
     /**
+     * Test query action.
+     *
+     * @return string
+     */
+    public function actionTestQuery()
+    {
+        $model = Message::getUserConversation(1, 1);
+
+        return $this->render('testQuery', [
+            'model' => $model,
+        ]);
+    }
+
+
+    /**
      * Window with messaging functionality
      *
      * @return mixed
