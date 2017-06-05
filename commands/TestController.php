@@ -29,7 +29,7 @@ class TestController extends Controller
     {
         echo $message . "\n";
     }
-	
+
 	/**
      * This command fills loginHistory tables and outputs the result.
      * @param string $dryRun if true then rows are not really inserted to db table.
@@ -37,14 +37,42 @@ class TestController extends Controller
      */
     public function actionFillLoginHistory($dryRun = false, $amount = 5)
     {
-        echo UserAgent::random(); exit;
         for ($i = 0; $i <= $amount; $i++) {
+            $possiblePlatformIDs = [0, 1, 2]; //0 - Desktop, 1 - Android, 2 - iOS
+            $platformID = array_rand($possiblePlatformIDs);
+
+            // define possible OS types for UserAgent
+            $osType = [];
+            if ($platformID == 0) { // Windows, Linux, OS X
+                $osType = ['Windows', 'Linux', 'OS X'];
+            } elseif ($platformID == 1) { // Android
+                $osType = ['Android'];
+            } elseif ($platformID == 2) { // iOS
+                $osType = ['iOS'];
+            }
+
+            $userAgent = UserAgent::random([
+                'os_type' => $osType
+            ]);
+
             $log = new LoginHistory();
-		    $log->userID = mt_rand(1, 20000);
-            $log->loginIPAddress = "".mt_rand(0,255).".".mt_rand(0,255).".".mt_rand(0,255).".".mt_rand(0,255);
-            $log->platformID = mt_rand(1, 4);
-            $log->deviceInfo;
-            
+            $log->userID = mt_rand(1, 20000);
+            $log->loginIPAddress = "" . mt_rand(0,255) . "." . mt_rand(0,255) . "." . mt_rand(0,255) . "." . mt_rand(0,255);
+            $log->platformID = $platformID;
+            $log->deviceInfo = $userAgent;
+            $log->dateTime = date("Y-m-d H:i:s");
+
+            if (!$dryRun) {
+                if ($log->save()) {
+                    echo "iteration #" . $i . " saved\n";
+                } else {
+                    echo "save error\n";
+                }
+            } else {
+                echo "iteration #" . $i . "\n";
+            }
         }
+
+        echo "\nfinished";
     }
 }
