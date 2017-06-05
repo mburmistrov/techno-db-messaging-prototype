@@ -52,4 +52,20 @@ class LoginHistory extends \yii\db\ActiveRecord
             'dateTime' => Yii::t('app', 'Date Time'),
         ];
     }
+
+    /**
+     * Returns count of user logins.
+     */
+    public static function calculateUserLogins()
+    {
+        $sql = "
+        SELECT userID, count(*) as cnt
+        FROM loginHistory
+        GROUP BY userID
+        ORDER BY cnt DESC
+        ";
+
+        $command = Yii::$app->db->createCommand($sql);
+        return $command->queryAll();
+    }
 }

@@ -11,6 +11,7 @@ use app\models\SignupForm;
 use app\models\ContactForm;
 use app\models\User;
 use app\models\Message;
+use app\models\LoginHistory;
 
 class SiteController extends Controller
 {
@@ -131,7 +132,7 @@ class SiteController extends Controller
      */
     public function actionTestQuery()
     {
-        $model = Message::getUserConversation(1, 1);
+        $model = LoginHistory::calculateUserLogins();
 
         return $this->render('testQuery', [
             'model' => $model,
