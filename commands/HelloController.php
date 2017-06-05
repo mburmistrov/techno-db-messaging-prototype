@@ -8,7 +8,6 @@
 namespace app\commands;
 
 use yii\console\Controller;
-use app\models\LoginHistory;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -18,7 +17,7 @@ use app\models\LoginHistory;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class TestController extends Controller
+class HelloController extends Controller
 {
     /**
      * This command echoes what you have entered as the message.
@@ -27,17 +26,5 @@ class TestController extends Controller
     public function actionIndex($message = 'hello world')
     {
         echo $message . "\n";
-    }
-	
-	/**
-     * This command fills loginHistory table with test data and outputs the result.
-	 * @param bool $dryRun if true rows are not really inserted to table.
-     * @param int $amount amount of generated rows.
-     */
-    public function actionFillLoginHistory($dryRun = false, $amount = 5)
-    {
-        for($i = 0; $i < 5; $i++){
-        	
-        }
     }
 }
