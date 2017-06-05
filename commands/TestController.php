@@ -57,7 +57,8 @@ class TestController extends Controller
 
             $log = new LoginHistory();
             $log->userID = mt_rand(1, 20000);
-            $log->loginIPAddress = "" . mt_rand(0,255) . "." . mt_rand(0,255) . "." . mt_rand(0,255) . "." . mt_rand(0,255);
+            $log->loginIPAddress = "" . mt_rand(0,255) . "." . mt_rand(0,255)
+                                    . "." . mt_rand(0,255) . "." . mt_rand(0,255);
             $log->platformID = $platformID;
             $log->deviceInfo = $userAgent;
             $log->dateTime = date("Y-m-d H:i:s");
