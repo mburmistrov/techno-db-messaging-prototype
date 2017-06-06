@@ -59,7 +59,7 @@ class LoginHistory extends \yii\db\ActiveRecord
     public static function calculateUserLogins()
     {
         $sql = "
-        SELECT userID, count(*) as cnt
+        SELECT SQL_NO_CACHE userID, count(*) as cnt
         FROM loginHistory
         GROUP BY userID
         ORDER BY cnt DESC
