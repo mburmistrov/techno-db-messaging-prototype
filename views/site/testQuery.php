@@ -1,3 +1,6 @@
 <?php
+
+use \yii\helpers\VarDumper;
+
 echo "<pre>";
-yii\Helpers\VarDumper::dump($model);
+VarDumper::dump($model);
