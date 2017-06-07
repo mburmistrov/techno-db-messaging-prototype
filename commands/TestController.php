@@ -37,7 +37,7 @@ class TestController extends Controller
      */
     public function actionFillLoginHistory($dryRun = false, $amount = 5)
     {
-        for ($i = 0; $i <= $amount; $i++) {
+        for ($i = 0; $i < $amount; $i++) {
             $possiblePlatformIDs = [0, 1, 2]; //0 - Desktop, 1 - Android, 2 - iOS
             $platformID = array_rand($possiblePlatformIDs);
 
