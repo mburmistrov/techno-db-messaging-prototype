@@ -72,6 +72,16 @@ class SiteController extends Controller
     }
 
     /**
+     * Makes tsst.
+     *
+     * @return string
+     */
+    public function actionTsst()
+    {
+        Yii::warning($_SERVER['REQUEST_URI']);
+    }
+
+    /**
      * Login action.
      *
      * @return string
